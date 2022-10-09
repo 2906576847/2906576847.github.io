@@ -367,6 +367,7 @@ gui.addColor({ color: outColor.getHexString()}, "color")
   u.uColorOut.value = [ r, g, b ]
 })
 
+gui.domElement.style.display = "none"
 
 
 // ------------------------ //
@@ -402,8 +403,6 @@ new TWEEN.Tween({
   universe.rotation.y = rotate / 3
 })
 .start()
-    
-gui.hide()
 
 
 
