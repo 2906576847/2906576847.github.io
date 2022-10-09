@@ -401,8 +401,9 @@ new TWEEN.Tween({
   galaxy.rotation.y = rotate
   universe.rotation.y = rotate / 3
 })
-.onComplete(() => gui.close())
 .start()
+    
+gui.hide()
 
 
 
