@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pexels Category Videos</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        #media-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        #media-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 100px);
+        }
+        #video-bg, #image-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #controls {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            background: rgba(28,28,30,0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        body:hover #controls {
+            opacity: 1;
+        }
+        button, select {
+            background: rgba(120,120,128,0.2);
+            border: none;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            transition: all 0.2s;
+            min-width: 120px;
+            text-align: center;
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 36px;
+        }
+        select option {
+            background: #1c1c1e;
+        }
+        button:hover {
+            background: rgba(120,120,128,0.3);
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+        #interval-input {
+            background: rgba(120,120,128,0.2);
+            border: none;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            width: 80px;
+        }
+        #info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            max-width: 300px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            background: linear-gradient(to right, rgba(0,0,0,0.7), transparent);
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+        }
+        body:hover #info {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="media-container">
+        <video id="video-bg" autoplay muted loop style="display:none;"></video>
+        <img id="image-bg" style="display:none; width:100%; height:100%; object-fit:cover;">
+    </div>
+    
+    <div id="info">
+        <div id="photographer">Loading...</div>
+        <div id="duration" style="font-size: 14px; margin-top: 5px;"></div>
+        <div id="category" style="font-size: 14px; margin-top: 5px;"></div>
+    </div>
+    
+    <div id="controls">
+        <div style="display: flex; gap: 8px;">
+            <select id="category-select">
+                <option value="nature">Nature</option>
+                <option value="ocean">Ocean</option>
+                <option value="landscape">Landscape</option>
+                <option value="city">City</option>
+                <option value="animals">Animals</option>
+                <option value="custom">Custom</option>
+            </select>
+            <input type="text" id="custom-query" placeholder="Enter keywords..." style="display: none;">
+            <button id="search-btn" style="display: none;">Search</button>
+        </div>
+        <button id="prev-btn">Previous</button>
+        <button id="next-btn">Next</button>
+        <button id="loop-btn">Loop: Off</button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="toggle-auto-btn">Auto Switch: On</button>
+            <input type="number" id="interval-input" placeholder="Hours" min="0.1" step="0.1" value="0.5" style="width: 80px;">
+            <button id="set-interval-btn">Set</button>
+        </div>
+        <select id="media-type-select">
+            <option value="videos">Videos</option>
+            <option value="photos">Photos</option>
+        </select>
+        <select id="quality-select">
+            <option value="sd">SD</option>
+            <option value="hd" selected>HD</option>
+            <option value="uhd">UHD</option>
+        </select>
+    </div>
+
+    <script>
+        // 多个Pexels API密钥，每次随机使用一个
+        const API_KEYS = [
+            '563492ad6f917000010000019b983f3b62fe43daa92e746d4553dd35',
+            'LmimnbcCCFaWU7wgWSua5vVWVmONrzv8xKKtfXhU9c39TLMYIeSf7UOD',
+            'p1p0I9iC7ChShttx4Z29WDLsyfW6V6mSm05l0cE0evnxyYckEdCFqkEl',
+            'Jy1mnvk6Yb3OmlkH6VnfCO95yOGGELCAi0pvq9QNsPFLz0u3fTTez1hh',
+            'RHCHpYa7xVhGqDxMtDbEd9aFCyrTAAg4EHhot3rdlkLyWAtXFjE6hHsD',
+            'tR1sh3nlY8aPATAcLApPg3odWO7Fjg5WmeSXjWv9MA3nWFTdIFQH0O39'
+            
+        ];
+        
+        // 获取随机API密钥
+        function getRandomApiKey() {
+            if (API_KEYS.length === 0) {
+                throw new Error('No API keys configured');
+            }
+            const randomIndex = Math.floor(Math.random() * API_KEYS.length);
+            return API_KEYS[randomIndex];
+        }
+        let currentMediaIndex = 0;
+        let mediaItems = [];
+        let autoSwitchInterval;
+        let isAutoSwitch = true;
+        let isLoopCurrent = false;
+        let currentPage = 1;
+        let isLoading = false;
+        let currentCategory = 'nature';
+        let switchIntervalHours = 0.5; // 默认0.5小时
+        let mediaType = 'videos'; // 'videos' 或 'photos'
+        
+        // 保存设置到localStorage
+        function saveSettings() {
+            const settings = {
+                category: document.getElementById('category-select').value,
+                customQuery: document.getElementById('custom-query').value,
+                autoSwitch: isAutoSwitch,
+                loopCurrent: isLoopCurrent,
+                quality: document.getElementById('quality-select').value,
+                switchIntervalHours: switchIntervalHours,
+                mediaType: document.getElementById('media-type-select').value
+            };
+            localStorage.setItem('pexelsVideoSettings', JSON.stringify(settings));
+        }
+
+        // 从localStorage加载设置
+        function loadSettings() {
+            const saved = localStorage.getItem('pexelsVideoSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                document.getElementById('category-select').value = settings.category;
+                document.getElementById('quality-select').value = settings.quality;
+                document.getElementById('media-type-select').value = settings.mediaType || 'videos';
+                isAutoSwitch = settings.autoSwitch;
+                isLoopCurrent = settings.loopCurrent;
+                switchIntervalHours = settings.switchIntervalHours || 0.5;
+                mediaType = settings.mediaType || 'videos';
+                
+                // 更新UI状态
+                document.getElementById('toggle-auto-btn').textContent = `Auto Switch: ${isAutoSwitch ? 'On' : 'Off'}`;
+                document.getElementById('loop-btn').textContent = `Loop: ${isLoopCurrent ? 'On' : 'Off'}`;
+                document.getElementById('interval-input').value = switchIntervalHours;
+                
+                // 处理自定义查询显示
+                const showCustom = settings.category === 'custom';
+                document.getElementById('custom-query').style.display = showCustom ? 'block' : 'none';
+                document.getElementById('search-btn').style.display = showCustom ? 'block' : 'none';
+                if (showCustom) {
+                    document.getElementById('custom-query').value = settings.customQuery || '';
+                }
+            }
+        }
+
+        // 初始化
+        window.onload = async function() {
+            loadSettings();
+            setupControls();
+            await fetchMedia();
+            if (isAutoSwitch) startAutoSwitch();
+        };
+        
+        async function fetchMedia(page = 1) {
+            if (isLoading) return;
+            isLoading = true;
+            currentCategory = document.getElementById('category-select').value;
+            mediaType = document.getElementById('media-type-select').value;
+            let query = currentCategory;
+            
+            if (currentCategory === 'custom') {
+                const customQuery = document.getElementById('custom-query').value.trim();
+                if (!customQuery) return;
+                query = customQuery;
+            }
+            
+            try {
+                document.getElementById('photographer').textContent = `Loading ${mediaType}...`;
+                let apiUrl;
+                if (mediaType === 'videos') {
+                    apiUrl = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=10&page=${page}`;
+                } else {
+                    apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&page=${page}`;
+                }
+                
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': getRandomApiKey()
+                    }
+                });
+                const data = await response.json();
+                
+                if (page === 1) {
+                    mediaItems = mediaType === 'videos' ? data.videos : data.photos;
+                    playMedia(0);
+                } else {
+                    const newItems = mediaType === 'videos' ? data.videos : data.photos;
+                    mediaItems = [...mediaItems, ...newItems];
+                    document.getElementById('photographer').textContent = `Loaded ${newItems.length} more ${mediaType}`;
+                    setTimeout(() => {
+                        if (document.getElementById('photographer').textContent.includes('Loaded')) {
+                            updateMediaInfo();
+                        }
+                    }, 2000);
+                }
+                currentPage = page;
+            } catch (error) {
+                console.error(`Error fetching ${mediaType}:`, error);
+                document.getElementById('photographer').textContent = `Failed to load ${mediaType}`;
+            } finally {
+                isLoading = false;
+            }
+        }
+        
+        function playMedia(index) {
+            if (!mediaItems.length) return;
+            
+            // 检查是否需要加载更多媒体
+            if (index >= mediaItems.length && !isLoading) {
+                fetchMedia(currentPage + 1);
+                currentMediaIndex = mediaItems.length - 1;
+                return;
+            }
+            
+            currentMediaIndex = (index + mediaItems.length) % mediaItems.length;
+            updateMediaInfo();
+        }
+        
+        function updateMediaInfo() {
+            const media = mediaItems[currentMediaIndex];
+            const videoBg = document.getElementById('video-bg');
+            const imageBg = document.getElementById('image-bg');
+            
+            if (mediaType === 'videos') {
+                const quality = document.getElementById('quality-select').value;
+                // 优先获取适合移动设备的视频质量
+                let videoFile = media.video_files.find(file => file.quality === quality);
+                if (!videoFile) {
+                    const qualityOrder = ['hd', 'sd', 'uhd']; // 优先HD而非UHD
+                    for (const q of qualityOrder) {
+                        videoFile = media.video_files.find(file => file.quality === q);
+                        if (videoFile) break;
+                    }
+                    videoFile = videoFile || media.video_files[0];
+                }
+                
+                // 创建临时video元素进行预加载
+                const tempVideo = document.createElement('video');
+                tempVideo.oncanplay = function() {
+                    // 新内容加载完成后直接替换src，保持当前显示
+                    videoBg.src = videoFile.link;
+                    videoBg.oncanplay = function() {
+                        updateMediaMetadata(media, videoFile);
+                    };
+                    videoBg.load();
+                };
+                tempVideo.src = videoFile.link;
+                tempVideo.load();
+            } else {
+                // 创建临时image元素进行预加载
+                const tempImg = new Image();
+                tempImg.onload = function() {
+                    // 新内容加载完成后直接替换src，保持当前显示
+                    imageBg.src = tempImg.src;
+                    imageBg.onload = function() {
+                        updateMediaMetadata(media);
+                    };
+                };
+                tempImg.src = media.src.large2x || media.src.large || media.src.medium || media.src.original;
+            }
+        }
+        
+        function updateMediaMetadata(media, videoFile = null) {
+            const videoBg = document.getElementById('video-bg');
+            const imageBg = document.getElementById('image-bg');
+            
+            if (mediaType === 'videos') {
+                videoBg.style.display = 'block';
+                imageBg.style.display = 'none';
+                document.getElementById('photographer').textContent = `Photographer: ${media.user.name}`;
+                document.getElementById('duration').textContent = `Duration: ${Math.floor(media.duration)}s | Quality: ${videoFile.quality.toUpperCase()}`;
+            } else {
+                videoBg.style.display = 'none';
+                imageBg.style.display = 'block';
+                document.getElementById('photographer').textContent = `Photographer: ${media.photographer}`;
+                document.getElementById('duration').textContent = `Photo | Size: ${media.width}x${media.height}`;
+            }
+            document.getElementById('category').textContent = `Category: ${currentCategory} | Type: ${mediaType}`;
+        }
+        
+        function setupControls() {
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                if (isAutoSwitch) toggleAutoSwitch();
+                playMedia(currentMediaIndex - 1);
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', () => {
+                if (isAutoSwitch) toggleAutoSwitch();
+                playMedia(currentMediaIndex + 1);
+            });
+            
+            document.getElementById('toggle-auto-btn').addEventListener('click', toggleAutoSwitch);
+            document.getElementById('loop-btn').addEventListener('click', toggleLoopCurrent);
+            document.getElementById('quality-select').addEventListener('change', () => {
+                updateMediaInfo();
+            });
+            document.getElementById('category-select').addEventListener('change', function() {
+                const customQuery = document.getElementById('custom-query');
+                const showCustom = this.value === 'custom';
+                customQuery.style.display = showCustom ? 'block' : 'none';
+                document.getElementById('search-btn').style.display = showCustom ? 'block' : 'none';
+                if (!showCustom) {
+                    currentPage = 1; // 重置页码
+                    fetchMedia();
+                }
+                saveSettings();
+            });
+            
+            document.getElementById('search-btn').addEventListener('click', function() {
+                const query = document.getElementById('custom-query').value.trim();
+                if (query) {
+                    currentPage = 1; // 重置页码
+                    fetchMedia();
+                    saveSettings();
+                }
+            });
+            
+            document.getElementById('set-interval-btn').addEventListener('click', function() {
+                const hours = parseFloat(document.getElementById('interval-input').value);
+                if (hours && hours > 0) {
+                    switchIntervalHours = hours;
+                    if (isAutoSwitch) {
+                        startAutoSwitch(); // 重新启动定时器
+                    }
+                    saveSettings();
+                    alert(`Auto switch interval set to ${hours} hour(s)`);
+                }
+            });
+        }
+        
+        function toggleAutoSwitch() {
+            if (isLoopCurrent) {
+                isLoopCurrent = false;
+                document.getElementById('loop-btn').textContent = 'Loop: Off';
+            }
+            
+            isAutoSwitch = !isAutoSwitch;
+            document.getElementById('toggle-auto-btn').textContent = `Auto Switch: ${isAutoSwitch ? 'On' : 'Off'}`;
+            
+            if (isAutoSwitch) {
+                startAutoSwitch();
+            } else {
+                clearInterval(autoSwitchInterval);
+            }
+            saveSettings();
+        }
+
+        function toggleLoopCurrent() {
+            isLoopCurrent = !isLoopCurrent;
+            document.getElementById('loop-btn').textContent = `Loop: ${isLoopCurrent ? 'On' : 'Off'}`;
+            
+            if (isLoopCurrent) {
+                clearInterval(autoSwitchInterval);
+                isAutoSwitch = false;
+                document.getElementById('toggle-auto-btn').textContent = 'Auto Switch: Off';
+            }
+            saveSettings();
+        }
+        
+        function startAutoSwitch() {
+            clearInterval(autoSwitchInterval);
+            if (isLoopCurrent) return;
+            
+            const intervalMs = switchIntervalHours * 60 * 60 * 1000; // 转换为毫秒
+            autoSwitchInterval = setInterval(() => {
+                const videoBg = document.getElementById('video-bg');
+                const imageBg = document.getElementById('image-bg');
+                
+                // 确保当前媒体已加载完成
+                if ((mediaType === 'videos' && videoBg.readyState >= 3) || 
+                    (mediaType === 'photos' && imageBg.complete)) {
+                    playMedia(currentMediaIndex + 1);
+                }
+            }, intervalMs);
+        }
+    </script>
+</body>
+</html>
