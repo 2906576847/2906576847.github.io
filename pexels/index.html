@@ -10,6 +10,7 @@
             padding: 0;
             height: 100%;
             overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
         }
         #media-container {
             position: fixed;
@@ -33,6 +34,33 @@
             height: 100%;
             object-fit: cover;
         }
+        
+        /* 移动端菜单按钮 */
+        #menu-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(28,28,30,0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        #menu-toggle span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: white;
+            margin: 6px 0;
+            transition: 0.3s;
+        }
+        
+        /* 控制菜单 - 桌面版 */
         #controls {
             position: fixed;
             top: 50%;
@@ -41,19 +69,57 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            opacity: 0;
-            transition: opacity 0.3s;
             background: rgba(28,28,30,0.8);
             backdrop-filter: blur(20px);
             border-radius: 12px;
             padding: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             border: 1px solid rgba(255,255,255,0.1);
+            z-index: 999;
+            transition: transform 0.3s ease;
         }
-        body:hover #controls {
-            opacity: 1;
+        
+        /* 移动端菜单样式 */
+        @media (max-width: 768px) {
+            #menu-toggle {
+                display: block;
+            }
+            
+            #controls {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 280px;
+                height: 100vh;
+                transform: translateX(100%);
+                border-radius: 0;
+                margin: 0;
+                padding: 80px 20px 20px;
+                gap: 16px;
+            }
+            
+            #controls.active {
+                transform: translateX(0);
+            }
+            
+            /* 菜单项在移动端的样式调整 */
+            button, select, input {
+                font-size: 16px !important; /* 防止iOS缩放 */
+                min-width: auto;
+                width: 100%;
+            }
+            
+            #controls > div {
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+            
+            #interval-input {
+                width: 100% !important;
+            }
         }
-        button, select {
+        
+        button, select, input {
             background: rgba(120,120,128,0.2);
             border: none;
             color: white;
@@ -65,7 +131,9 @@
             transition: all 0.2s;
             min-width: 120px;
             text-align: center;
+            box-sizing: border-box;
         }
+        
         select {
             appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
@@ -74,15 +142,19 @@
             background-size: 16px;
             padding-right: 36px;
         }
+        
         select option {
             background: #1c1c1e;
         }
+        
         button:hover {
             background: rgba(120,120,128,0.3);
         }
+        
         button:active {
             transform: scale(0.96);
         }
+        
         #interval-input {
             background: rgba(120,120,128,0.2);
             border: none;
@@ -92,6 +164,7 @@
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             width: 80px;
         }
+        
         #info {
             position: fixed;
             bottom: 20px;
@@ -105,7 +178,27 @@
             padding: 15px 20px;
             border-radius: 0 10px 10px 0;
         }
+        
         body:hover #info {
+            opacity: 1;
+        }
+        
+        /* 遮罩层 */
+        #menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        #menu-overlay.active {
+            display: block;
             opacity: 1;
         }
     </style>
@@ -115,6 +208,16 @@
         <video id="video-bg" autoplay muted loop style="display:none;"></video>
         <img id="image-bg" style="display:none; width:100%; height:100%; object-fit:cover;">
     </div>
+    
+    <!-- 移动端菜单按钮 -->
+    <div id="menu-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <!-- 遮罩层 -->
+    <div id="menu-overlay"></div>
     
     <div id="info">
         <div id="photographer">Loading...</div>
@@ -163,7 +266,6 @@
             'Jy1mnvk6Yb3OmlkH6VnfCO95yOGGELCAi0pvq9QNsPFLz0u3fTTez1hh',
             'RHCHpYa7xVhGqDxMtDbEd9aFCyrTAAg4EHhot3rdlkLyWAtXFjE6hHsD',
             'tR1sh3nlY8aPATAcLApPg3odWO7Fjg5WmeSXjWv9MA3nWFTdIFQH0O39'
-            
         ];
         
         // 获取随机API密钥
@@ -174,6 +276,7 @@
             const randomIndex = Math.floor(Math.random() * API_KEYS.length);
             return API_KEYS[randomIndex];
         }
+        
         let currentMediaIndex = 0;
         let mediaItems = [];
         let autoSwitchInterval;
@@ -182,8 +285,34 @@
         let currentPage = 1;
         let isLoading = false;
         let currentCategory = 'nature';
-        let switchIntervalHours = 0.5; // 默认0.5小时
-        let mediaType = 'videos'; // 'videos' 或 'photos'
+        let switchIntervalHours = 0.5;
+        let mediaType = 'videos';
+        let isMenuOpen = false;
+        
+        // 菜单控制
+        const menuToggle = document.getElementById('menu-toggle');
+        const controls = document.getElementById('controls');
+        const menuOverlay = document.getElementById('menu-overlay');
+        
+        function toggleMenu() {
+            isMenuOpen = !isMenuOpen;
+            controls.classList.toggle('active', isMenuOpen);
+            menuOverlay.classList.toggle('active', isMenuOpen);
+        }
+        
+        function closeMenu() {
+            isMenuOpen = false;
+            controls.classList.remove('active');
+            menuOverlay.classList.remove('active');
+        }
+        
+        menuToggle.addEventListener('click', toggleMenu);
+        menuOverlay.addEventListener('click', closeMenu);
+        
+        // 点击菜单内部不关闭菜单
+        controls.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
         
         // 保存设置到localStorage
         function saveSettings() {
@@ -212,12 +341,10 @@
                 switchIntervalHours = settings.switchIntervalHours || 0.5;
                 mediaType = settings.mediaType || 'videos';
                 
-                // 更新UI状态
                 document.getElementById('toggle-auto-btn').textContent = `Auto Switch: ${isAutoSwitch ? 'On' : 'Off'}`;
                 document.getElementById('loop-btn').textContent = `Loop: ${isLoopCurrent ? 'On' : 'Off'}`;
                 document.getElementById('interval-input').value = switchIntervalHours;
                 
-                // 处理自定义查询显示
                 const showCustom = settings.category === 'custom';
                 document.getElementById('custom-query').style.display = showCustom ? 'block' : 'none';
                 document.getElementById('search-btn').style.display = showCustom ? 'block' : 'none';
@@ -289,7 +416,6 @@
         function playMedia(index) {
             if (!mediaItems.length) return;
             
-            // 检查是否需要加载更多媒体
             if (index >= mediaItems.length && !isLoading) {
                 fetchMedia(currentPage + 1);
                 currentMediaIndex = mediaItems.length - 1;
@@ -307,10 +433,9 @@
             
             if (mediaType === 'videos') {
                 const quality = document.getElementById('quality-select').value;
-                // 优先获取适合移动设备的视频质量
                 let videoFile = media.video_files.find(file => file.quality === quality);
                 if (!videoFile) {
-                    const qualityOrder = ['hd', 'sd', 'uhd']; // 优先HD而非UHD
+                    const qualityOrder = ['hd', 'sd', 'uhd'];
                     for (const q of qualityOrder) {
                         videoFile = media.video_files.find(file => file.quality === q);
                         if (videoFile) break;
@@ -318,10 +443,8 @@
                     videoFile = videoFile || media.video_files[0];
                 }
                 
-                // 创建临时video元素进行预加载
                 const tempVideo = document.createElement('video');
                 tempVideo.oncanplay = function() {
-                    // 新内容加载完成后直接替换src，保持当前显示
                     videoBg.src = videoFile.link;
                     videoBg.oncanplay = function() {
                         updateMediaMetadata(media, videoFile);
@@ -331,10 +454,8 @@
                 tempVideo.src = videoFile.link;
                 tempVideo.load();
             } else {
-                // 创建临时image元素进行预加载
                 const tempImg = new Image();
                 tempImg.onload = function() {
-                    // 新内容加载完成后直接替换src，保持当前显示
                     imageBg.src = tempImg.src;
                     imageBg.onload = function() {
                         updateMediaMetadata(media);
@@ -366,11 +487,13 @@
             document.getElementById('prev-btn').addEventListener('click', () => {
                 if (isAutoSwitch) toggleAutoSwitch();
                 playMedia(currentMediaIndex - 1);
+                if (window.innerWidth <= 768) closeMenu();
             });
             
             document.getElementById('next-btn').addEventListener('click', () => {
                 if (isAutoSwitch) toggleAutoSwitch();
                 playMedia(currentMediaIndex + 1);
+                if (window.innerWidth <= 768) closeMenu();
             });
             
             document.getElementById('toggle-auto-btn').addEventListener('click', toggleAutoSwitch);
@@ -384,7 +507,7 @@
                 customQuery.style.display = showCustom ? 'block' : 'none';
                 document.getElementById('search-btn').style.display = showCustom ? 'block' : 'none';
                 if (!showCustom) {
-                    currentPage = 1; // 重置页码
+                    currentPage = 1;
                     fetchMedia();
                 }
                 saveSettings();
@@ -393,9 +516,10 @@
             document.getElementById('search-btn').addEventListener('click', function() {
                 const query = document.getElementById('custom-query').value.trim();
                 if (query) {
-                    currentPage = 1; // 重置页码
+                    currentPage = 1;
                     fetchMedia();
                     saveSettings();
+                    if (window.innerWidth <= 768) closeMenu();
                 }
             });
             
@@ -404,10 +528,10 @@
                 if (hours && hours > 0) {
                     switchIntervalHours = hours;
                     if (isAutoSwitch) {
-                        startAutoSwitch(); // 重新启动定时器
+                        startAutoSwitch();
                     }
                     saveSettings();
-                    alert(`Auto switch interval set to ${hours} hour(s)`);
+                    if (window.innerWidth <= 768) closeMenu();
                 }
             });
         }
@@ -445,12 +569,11 @@
             clearInterval(autoSwitchInterval);
             if (isLoopCurrent) return;
             
-            const intervalMs = switchIntervalHours * 60 * 60 * 1000; // 转换为毫秒
+            const intervalMs = switchIntervalHours * 60 * 60 * 1000;
             autoSwitchInterval = setInterval(() => {
                 const videoBg = document.getElementById('video-bg');
                 const imageBg = document.getElementById('image-bg');
                 
-                // 确保当前媒体已加载完成
                 if ((mediaType === 'videos' && videoBg.readyState >= 3) || 
                     (mediaType === 'photos' && imageBg.complete)) {
                     playMedia(currentMediaIndex + 1);
