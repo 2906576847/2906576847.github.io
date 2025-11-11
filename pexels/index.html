@@ -10,7 +10,6 @@
             padding: 0;
             height: 100%;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
         }
         #media-container {
             position: fixed;
@@ -34,33 +33,6 @@
             height: 100%;
             object-fit: cover;
         }
-        
-        /* 移动端菜单按钮 */
-        #menu-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: rgba(28,28,30,0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 12px;
-            cursor: pointer;
-            display: none;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        
-        #menu-toggle span {
-            display: block;
-            width: 24px;
-            height: 2px;
-            background: white;
-            margin: 6px 0;
-            transition: 0.3s;
-        }
-        
-        /* 控制菜单 - 桌面版 */
         #controls {
             position: fixed;
             top: 50%;
@@ -69,57 +41,188 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            opacity: 0;
+            transition: all 0.3s ease;
             background: rgba(28,28,30,0.8);
             backdrop-filter: blur(20px);
             border-radius: 12px;
             padding: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             border: 1px solid rgba(255,255,255,0.1);
-            z-index: 999;
-            transition: transform 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 100;
         }
         
-        /* 移动端菜单样式 */
-        @media (max-width: 768px) {
-            #menu-toggle {
-                display: block;
+        #controls.show {
+            opacity: 1;
+        }
+        
+            #toggle-menu {
+                all: initial; /* 重置所有默认样式 */
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: rgba(28,28,30,0.9);
+                color: white;
+                font: 24px -apple-system, BlinkMacSystemFont, sans-serif;
+                z-index: 101;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                line-height: 60px;
+                text-align: center;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                /* 强制尺寸 */
+                min-width: 60px !important;
+                min-height: 60px !important;
+                max-width: 60px !important;
+                max-height: 60px !important;
+                /* 防止缩放影响 */
+                transform: none !important;
+                /* 防止flex布局影响 */
+                flex: 0 0 60px !important;
             }
             
+            @media (max-width: 768px) {
+                #toggle-menu {
+                    /* 确保移动端样式优先级 */
+                    all: unset !important;
+                    position: fixed !important;
+                    bottom: 20px !important;
+                    right: 20px !important;
+                    width: 60px !important;
+                    height: 60px !important;
+                    border-radius: 50% !important;
+                    background: rgba(28,28,30,0.9) !important;
+                    color: white !important;
+                    font: 24px -apple-system, BlinkMacSystemFont, sans-serif !important;
+                    z-index: 101 !important;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    border: none !important;
+                    outline: none !important;
+                    cursor: pointer !important;
+                    box-sizing: border-box !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    line-height: 60px !important;
+                    text-align: center !important;
+                }
+            }
+        
+        @media (max-width: 768px) {
             #controls {
                 position: fixed;
-                top: 0;
+                bottom: 0;
+                left: 0;
                 right: 0;
-                width: 280px;
-                height: 100vh;
-                transform: translateX(100%);
-                border-radius: 0;
-                margin: 0;
-                padding: 80px 20px 20px;
-                gap: 16px;
-            }
-            
-            #controls.active {
-                transform: translateX(0);
-            }
-            
-            /* 菜单项在移动端的样式调整 */
-            button, select, input {
-                font-size: 16px !important; /* 防止iOS缩放 */
-                min-width: auto;
                 width: 100%;
+                max-height: 85vh;
+                border-radius: 16px 16px 0 0;
+                transform: translateY(100%);
+                transition: transform 0.3s ease;
+                padding: 20px 15px;
+                opacity: 1;
+                pointer-events: none;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                box-sizing: border-box;
+            }
+            
+            #controls.show {
+                transform: translateY(0);
+                pointer-events: all;
+            #toggle-menu {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: rgba(28,28,30,0.9);
+                color: white;
+                font-size: 24px;
+                z-index: 101;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                display: none; /* 默认隐藏 */
+                align-items: center;
+                justify-content: center;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                line-height: 60px;
+                text-align: center;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+            }
+            @media (max-width: 768px) {
+                #toggle-menu {
+                    /* 确保移动端样式优先级 */
+                    display: flex !important;
+                }
+            }
+            
+            #toggle-menu:active {
+                transform: scale(0.95);
+                background: rgba(28,28,30,1);
+            }
+            
+            button, select {
+                width: 100%;
+                padding: 14px 12px;
+                font-size: 15px;
+                margin: 0;
+                box-sizing: border-box;
             }
             
             #controls > div {
-                flex-direction: column !important;
-                gap: 12px !important;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
             }
             
             #interval-input {
-                width: 100% !important;
+                width: 100%;
+                padding: 14px 12px;
+                box-sizing: border-box;
+            }
+            
+            /* 自定义查询框样式 */
+            #custom-query {
+                width: 100%;
+                padding: 14px 12px;
+                box-sizing: border-box;
+                border-radius: 8px;
+                border: none;
+                background: rgba(120,120,128,0.2);
+                color: white;
+                font-size: 15px;
             }
         }
-        
-        button, select, input {
+        button, select {
             background: rgba(120,120,128,0.2);
             border: none;
             color: white;
@@ -131,9 +234,7 @@
             transition: all 0.2s;
             min-width: 120px;
             text-align: center;
-            box-sizing: border-box;
         }
-        
         select {
             appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
@@ -142,19 +243,15 @@
             background-size: 16px;
             padding-right: 36px;
         }
-        
         select option {
             background: #1c1c1e;
         }
-        
         button:hover {
             background: rgba(120,120,128,0.3);
         }
-        
         button:active {
             transform: scale(0.96);
         }
-        
         #interval-input {
             background: rgba(120,120,128,0.2);
             border: none;
@@ -164,7 +261,6 @@
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             width: 80px;
         }
-        
         #info {
             position: fixed;
             bottom: 20px;
@@ -178,27 +274,7 @@
             padding: 15px 20px;
             border-radius: 0 10px 10px 0;
         }
-        
         body:hover #info {
-            opacity: 1;
-        }
-        
-        /* 遮罩层 */
-        #menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 998;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        #menu-overlay.active {
-            display: block;
             opacity: 1;
         }
     </style>
@@ -209,22 +285,9 @@
         <img id="image-bg" style="display:none; width:100%; height:100%; object-fit:cover;">
     </div>
     
-    <!-- 移动端菜单按钮 -->
-    <div id="menu-toggle">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
+        <div id="info" style="display:none;"></div>
     
-    <!-- 遮罩层 -->
-    <div id="menu-overlay"></div>
-    
-    <div id="info">
-        <div id="photographer">Loading...</div>
-        <div id="duration" style="font-size: 14px; margin-top: 5px;"></div>
-        <div id="category" style="font-size: 14px; margin-top: 5px;"></div>
-    </div>
-    
+    <button id="toggle-menu">☰</button>
     <div id="controls">
         <div style="display: flex; gap: 8px;">
             <select id="category-select">
@@ -266,6 +329,7 @@
             'Jy1mnvk6Yb3OmlkH6VnfCO95yOGGELCAi0pvq9QNsPFLz0u3fTTez1hh',
             'RHCHpYa7xVhGqDxMtDbEd9aFCyrTAAg4EHhot3rdlkLyWAtXFjE6hHsD',
             'tR1sh3nlY8aPATAcLApPg3odWO7Fjg5WmeSXjWv9MA3nWFTdIFQH0O39'
+            
         ];
         
         // 获取随机API密钥
@@ -276,7 +340,6 @@
             const randomIndex = Math.floor(Math.random() * API_KEYS.length);
             return API_KEYS[randomIndex];
         }
-        
         let currentMediaIndex = 0;
         let mediaItems = [];
         let autoSwitchInterval;
@@ -285,47 +348,53 @@
         let currentPage = 1;
         let isLoading = false;
         let currentCategory = 'nature';
-        let switchIntervalHours = 0.5;
-        let mediaType = 'videos';
-        let isMenuOpen = false;
-        
-        // 菜单控制
-        const menuToggle = document.getElementById('menu-toggle');
-        const controls = document.getElementById('controls');
-        const menuOverlay = document.getElementById('menu-overlay');
-        
-        function toggleMenu() {
-            isMenuOpen = !isMenuOpen;
-            controls.classList.toggle('active', isMenuOpen);
-            menuOverlay.classList.toggle('active', isMenuOpen);
-        }
-        
-        function closeMenu() {
-            isMenuOpen = false;
-            controls.classList.remove('active');
-            menuOverlay.classList.remove('active');
-        }
-        
-        menuToggle.addEventListener('click', toggleMenu);
-        menuOverlay.addEventListener('click', closeMenu);
-        
-        // 点击菜单内部不关闭菜单
-        controls.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
+        let switchIntervalHours = 0.5; // 默认0.5小时
+        let mediaType = 'videos'; // 'videos' 或 'photos'
         
         // 保存设置到localStorage
         function saveSettings() {
-            const settings = {
-                category: document.getElementById('category-select').value,
-                customQuery: document.getElementById('custom-query').value,
-                autoSwitch: isAutoSwitch,
-                loopCurrent: isLoopCurrent,
-                quality: document.getElementById('quality-select').value,
-                switchIntervalHours: switchIntervalHours,
-                mediaType: document.getElementById('media-type-select').value
-            };
-            localStorage.setItem('pexelsVideoSettings', JSON.stringify(settings));
+            try {
+                // 确保有有效的媒体数据
+                if (mediaItems.length > 0 && currentMediaIndex >= 0) {
+                    const currentMedia = mediaItems[currentMediaIndex];
+                    if (!currentMedia) {
+                        console.log('当前媒体项无效，不保存设置');
+                        return;
+                    }
+                    
+                    // 获取当前质量设置
+                    const quality = document.getElementById('quality-select').value;
+                    
+                    // 构建设置对象
+                    const settings = {
+                        category: document.getElementById('category-select').value,
+                        customQuery: document.getElementById('custom-query').value,
+                        autoSwitch: isAutoSwitch,
+                        loopCurrent: isLoopCurrent,
+                        quality: quality,
+                        switchIntervalHours: switchIntervalHours,
+                        mediaType: document.getElementById('media-type-select').value,
+                        currentMediaIndex: currentMediaIndex,
+                        currentMediaUrl: mediaType === 'videos' 
+                            ? (currentMedia.video_files.find(f => f.quality === quality)?.link || 
+                               currentMedia.video_files?.[0]?.link)
+                            : (currentMedia.src?.large2x || currentMedia.src?.original || ''),
+                        timestamp: new Date().toISOString() // 添加时间戳用于调试
+                    };
+                    
+                    // 保存到本地存储
+                    localStorage.setItem('pexelsVideoSettings', JSON.stringify(settings));
+                    
+                    console.log('设置已保存:', {
+                        ...settings,
+                        currentMediaUrl: settings.currentMediaUrl ? '存在' : '不存在' // 简化日志
+                    });
+                } else {
+                    console.log('没有有效的媒体数据，不保存设置');
+                }
+            } catch (error) {
+                console.error('保存设置失败:', error);
+            }
         }
 
         // 从localStorage加载设置
@@ -340,34 +409,190 @@
                 isLoopCurrent = settings.loopCurrent;
                 switchIntervalHours = settings.switchIntervalHours || 0.5;
                 mediaType = settings.mediaType || 'videos';
+                currentMediaIndex = settings.currentMediaIndex || 0;
                 
+                // 更新UI状态
                 document.getElementById('toggle-auto-btn').textContent = `Auto Switch: ${isAutoSwitch ? 'On' : 'Off'}`;
                 document.getElementById('loop-btn').textContent = `Loop: ${isLoopCurrent ? 'On' : 'Off'}`;
                 document.getElementById('interval-input').value = switchIntervalHours;
                 
+                // 处理自定义查询显示
                 const showCustom = settings.category === 'custom';
                 document.getElementById('custom-query').style.display = showCustom ? 'block' : 'none';
                 document.getElementById('search-btn').style.display = showCustom ? 'block' : 'none';
                 if (showCustom) {
                     document.getElementById('custom-query').value = settings.customQuery || '';
                 }
+                
+                // 如果有保存的媒体URL，立即显示
+                if (settings.currentMediaUrl) {
+                    const videoBg = document.getElementById('video-bg');
+                    const imageBg = document.getElementById('image-bg');
+                    
+                    if (mediaType === 'videos') {
+                        videoBg.src = settings.currentMediaUrl;
+                        videoBg.style.display = 'block';
+                        imageBg.style.display = 'none';
+                        videoBg.load();
+                        videoBg.play().catch(e => console.log('自动播放被阻止:', e));
+                    } else {
+                        imageBg.src = settings.currentMediaUrl;
+                        imageBg.style.display = 'block';
+                        videoBg.style.display = 'none';
+                    }
+                    
+                    // 确保媒体元素可见
+                    document.getElementById('media-container').style.display = 'block';
+                }
+                
+                return true; // 表示有保存的状态
+            }
+            return false; // 没有保存的状态
+        }
+
+        // 初始化
+        window.onload = async function() {
+            // 先加载设置
+            const hasSavedState = loadSettings();
+            setupControls();
+            
+            // 如果有保存的状态，优先恢复
+            if (hasSavedState) {
+                const saved = JSON.parse(localStorage.getItem('pexelsVideoSettings'));
+                
+                // 1. 立即显示保存的媒体内容
+                if (saved.currentMediaUrl) {
+                    const videoBg = document.getElementById('video-bg');
+                    const imageBg = document.getElementById('image-bg');
+                    
+                    if (saved.mediaType === 'videos') {
+                        videoBg.src = saved.currentMediaUrl;
+                        videoBg.style.display = 'block';
+                        imageBg.style.display = 'none';
+                        videoBg.load();
+                        videoBg.play().catch(e => console.log('自动播放被阻止:', e));
+                    } else {
+                        imageBg.src = saved.currentMediaUrl;
+                        imageBg.style.display = 'block';
+                        videoBg.style.display = 'none';
+                    }
+                    
+                    document.getElementById('media-container').style.display = 'block';
+                }
+                
+                // 2. 获取新内容但不重置播放位置
+                await fetchMedia(1, true);
+                
+                // 3. 恢复播放位置
+                if (saved.currentMediaIndex !== undefined && mediaItems.length > saved.currentMediaIndex) {
+                    playMedia(saved.currentMediaIndex);
+                }
+            } else {
+                // 没有保存状态，正常初始化
+                await fetchMedia();
+            }
+            
+            if (isAutoSwitch) startAutoSwitch();
+        };
+
+        async function fetchMedia(page = 1, preservePosition = false) {
+            if (isLoading) return;
+            isLoading = true;
+            
+            try {
+                // ... [保持原有API请求代码不变] ...
+                
+                if (page === 1) {
+                    if (preservePosition) {
+                        // 保留现有媒体项，添加新项到数组开头
+                        mediaItems = [...mediaData, ...mediaItems];
+                    } else {
+                        mediaItems = mediaData;
+                        playMedia(0);
+                    }
+                } else {
+                    mediaItems = [...mediaItems, ...mediaData];
+                    playMedia(currentMediaIndex);
+                }
+                
+                currentPage = page;
+                saveSettings(); // 每次获取新内容后保存状态
+            } catch (error) {
+                console.error('获取媒体内容失败:', error);
+            } finally {
+                isLoading = false;
             }
         }
 
         // 初始化
         window.onload = async function() {
-            loadSettings();
+            // 1. 先加载设置
+            const hasSavedState = loadSettings();
             setupControls();
-            await fetchMedia();
+            
+            // 2. 如果有保存的状态
+            if (hasSavedState) {
+                const saved = JSON.parse(localStorage.getItem('pexelsVideoSettings'));
+                console.log('恢复保存的状态:', saved);
+                
+                // 2.1 立即显示保存的媒体内容
+                if (saved.currentMediaUrl) {
+                    const videoBg = document.getElementById('video-bg');
+                    const imageBg = document.getElementById('image-bg');
+                    
+                    if (saved.mediaType === 'videos') {
+                        videoBg.src = saved.currentMediaUrl;
+                        videoBg.style.display = 'block';
+                        imageBg.style.display = 'none';
+                        videoBg.load();
+                        videoBg.play().catch(e => console.log('自动播放被阻止:', e));
+                    } else {
+                        imageBg.src = saved.currentMediaUrl;
+                        imageBg.style.display = 'block';
+                        videoBg.style.display = 'none';
+                    }
+                    
+                    document.getElementById('media-container').style.display = 'block';
+                }
+                
+                // 2.2 获取新内容但不重置播放位置
+                await fetchMedia(1, true);
+                
+                // 2.3 恢复播放位置
+                if (saved.currentMediaIndex !== undefined && mediaItems.length > 0) {
+                    const safeIndex = Math.min(saved.currentMediaIndex, mediaItems.length - 1);
+                    console.log('恢复播放位置:', safeIndex);
+                    playMedia(safeIndex);
+                } else if (mediaItems.length > 0) {
+                    console.log('恢复默认播放位置: 0');
+                    playMedia(0);
+                }
+            } else {
+                // 3. 没有保存状态，正常初始化
+                console.log('没有保存的状态，全新初始化');
+                await fetchMedia();
+            }
+            
             if (isAutoSwitch) startAutoSwitch();
+            
+            // 4. 确保最终有内容显示
+            if (mediaItems.length === 0) {
+                console.log('没有获取到媒体内容，重试...');
+                await fetchMedia();
+            }
+            
+            // 5. 确保保存当前状态
+            saveSettings();
         };
         
         async function fetchMedia(page = 1) {
             if (isLoading) return;
             isLoading = true;
+            console.log('开始获取媒体内容...');
             currentCategory = document.getElementById('category-select').value;
             mediaType = document.getElementById('media-type-select').value;
             let query = currentCategory;
+            console.log(`请求参数: 类型=${mediaType}, 分类=${currentCategory}, 页码=${page}`);
             
             if (currentCategory === 'custom') {
                 const customQuery = document.getElementById('custom-query').value.trim();
@@ -376,7 +601,7 @@
             }
             
             try {
-                document.getElementById('photographer').textContent = `Loading ${mediaType}...`;
+                // 已移除描述信息，不再需要设置textContent
                 let apiUrl;
                 if (mediaType === 'videos') {
                     apiUrl = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=10&page=${page}`;
@@ -384,46 +609,155 @@
                     apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&page=${page}`;
                 }
                 
-                const response = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': getRandomApiKey()
-                    }
-                });
-                const data = await response.json();
+                console.log(`正在请求URL: ${apiUrl}`);
+                let response;
+                let retryCount = 0;
+                const maxRetries = API_KEYS.length;
                 
-                if (page === 1) {
-                    mediaItems = mediaType === 'videos' ? data.videos : data.photos;
-                    playMedia(0);
-                } else {
-                    const newItems = mediaType === 'videos' ? data.videos : data.photos;
-                    mediaItems = [...mediaItems, ...newItems];
-                    document.getElementById('photographer').textContent = `Loaded ${newItems.length} more ${mediaType}`;
-                    setTimeout(() => {
-                        if (document.getElementById('photographer').textContent.includes('Loaded')) {
-                            updateMediaInfo();
+                while (retryCount < maxRetries) {
+                    try {
+                        response = await fetch(apiUrl, {
+                            headers: {
+                                'Authorization': getRandomApiKey()
+                            }
+                        });
+                        console.log(`响应状态: ${response.status}`);
+                        
+                        if (!response.ok) {
+                            if (response.status === 429) {
+                                console.warn(`API配额限制，尝试第${retryCount + 1}次重试`);
+                                retryCount++;
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                                continue;
+                            }
+                            throw new Error(`HTTP error! status: ${response.status}`);
                         }
-                    }, 2000);
+                        
+                        const apiResponse = await response.json();
+                        console.log('API完整响应:', apiResponse);
+                        
+                        // 严格验证响应格式
+                        if (!apiResponse || typeof apiResponse !== 'object') {
+                            throw new Error('无效的API响应: 非对象格式');
+                        }
+                        
+                        let mediaData;
+                        if (mediaType === 'videos') {
+                            if (!apiResponse.videos || !Array.isArray(apiResponse.videos)) {
+                                throw new Error('无效的视频数据格式');
+                            }
+                            mediaData = apiResponse.videos;
+                        } else {
+                            if (!apiResponse.photos || !Array.isArray(apiResponse.photos)) {
+                                throw new Error('无效的图片数据格式');
+                            }
+                            mediaData = apiResponse.photos;
+                        }
+                        
+                        if (mediaData.length === 0) {
+                            throw new Error('API返回空数据集');
+                        }
+                        
+                        if (page === 1) {
+                            // 如果是第一页且没有保存的状态，才重置播放位置
+                            if (!localStorage.getItem('pexelsVideoSettings')) {
+                                mediaItems = mediaData;
+                                playMedia(0);
+                            } else {
+                                // 保留现有媒体项，添加新项到数组开头
+                                mediaItems = [...mediaData, ...mediaItems];
+                            }
+                        } else {
+                            mediaItems = [...mediaItems, ...mediaData];
+                            playMedia(currentMediaIndex);
+                        }
+                        currentPage = page;
+                        break; // 成功则退出重试循环
+                        
+                    } catch (error) {
+                        console.error(`请求失败(尝试${retryCount + 1}/${maxRetries}):`, {
+                            url: apiUrl,
+                            error: error.message,
+                            stack: error.stack
+                        });
+                        
+                        if (retryCount < maxRetries - 1) {
+                            retryCount++;
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        } else {
+                            console.error('所有API密钥尝试失败');
+                            throw error;
+                        }
+                    }
                 }
-                currentPage = page;
+                
+                // 这部分代码已被移除，因为data变量在重试循环中已处理
             } catch (error) {
-                console.error(`Error fetching ${mediaType}:`, error);
-                document.getElementById('photographer').textContent = `Failed to load ${mediaType}`;
+                console.error('获取媒体内容失败:', {
+                    type: mediaType,
+                    category: currentCategory,
+                    page: page,
+                    error: error.message,
+                    stack: error.stack
+                });
+                
+                // 显示最后一个可用的媒体内容
+                if (mediaItems.length > 0) {
+                    playMedia(currentMediaIndex);
+                } else {
+                    console.error('没有可用的媒体内容');
+                }
             } finally {
                 isLoading = false;
             }
         }
         
         function playMedia(index) {
-            if (!mediaItems.length) return;
+            if (!mediaItems.length) {
+                console.log('没有可播放的媒体内容');
+                return;
+            }
             
+            // 确保索引在有效范围内
+            const safeIndex = Math.max(0, Math.min(index, mediaItems.length - 1));
+            
+            // 检查是否需要加载更多媒体
             if (index >= mediaItems.length && !isLoading) {
                 fetchMedia(currentPage + 1);
                 currentMediaIndex = mediaItems.length - 1;
                 return;
             }
             
-            currentMediaIndex = (index + mediaItems.length) % mediaItems.length;
-            updateMediaInfo();
+            currentMediaIndex = (safeIndex + mediaItems.length) % mediaItems.length;
+            const currentMedia = mediaItems[currentMediaIndex];
+            
+            // 立即更新显示
+            const videoBg = document.getElementById('video-bg');
+            const imageBg = document.getElementById('image-bg');
+            
+            if (mediaType === 'videos') {
+                const quality = document.getElementById('quality-select').value;
+                let videoFile = currentMedia.video_files.find(f => f.quality === quality) || currentMedia.video_files[0];
+                
+                // 确保视频源变化时才重新加载
+                if (videoBg.src !== videoFile.link) {
+                    videoBg.src = videoFile.link;
+                    videoBg.load();
+                }
+                videoBg.style.display = 'block';
+                imageBg.style.display = 'none';
+                videoBg.play().catch(e => console.log('自动播放被阻止:', e));
+            } else {
+                const newSrc = currentMedia.src.large2x || currentMedia.src.original;
+                // 确保图片源变化时才重新加载
+                if (imageBg.src !== newSrc) {
+                    imageBg.src = newSrc;
+                }
+                imageBg.style.display = 'block';
+                videoBg.style.display = 'none';
+            }
+            
+            saveSettings(); // 每次播放新内容时保存状态
         }
         
         function updateMediaInfo() {
@@ -433,9 +767,10 @@
             
             if (mediaType === 'videos') {
                 const quality = document.getElementById('quality-select').value;
+                // 优先获取适合移动设备的视频质量
                 let videoFile = media.video_files.find(file => file.quality === quality);
                 if (!videoFile) {
-                    const qualityOrder = ['hd', 'sd', 'uhd'];
+                    const qualityOrder = ['hd', 'sd', 'uhd']; // 优先HD而非UHD
                     for (const q of qualityOrder) {
                         videoFile = media.video_files.find(file => file.quality === q);
                         if (videoFile) break;
@@ -443,8 +778,10 @@
                     videoFile = videoFile || media.video_files[0];
                 }
                 
+                // 创建临时video元素进行预加载
                 const tempVideo = document.createElement('video');
                 tempVideo.oncanplay = function() {
+                    // 新内容加载完成后直接替换src，保持当前显示
                     videoBg.src = videoFile.link;
                     videoBg.oncanplay = function() {
                         updateMediaMetadata(media, videoFile);
@@ -454,8 +791,10 @@
                 tempVideo.src = videoFile.link;
                 tempVideo.load();
             } else {
+                // 创建临时image元素进行预加载
                 const tempImg = new Image();
                 tempImg.onload = function() {
+                    // 新内容加载完成后直接替换src，保持当前显示
                     imageBg.src = tempImg.src;
                     imageBg.onload = function() {
                         updateMediaMetadata(media);
@@ -472,28 +811,37 @@
             if (mediaType === 'videos') {
                 videoBg.style.display = 'block';
                 imageBg.style.display = 'none';
-                document.getElementById('photographer').textContent = `Photographer: ${media.user.name}`;
-                document.getElementById('duration').textContent = `Duration: ${Math.floor(media.duration)}s | Quality: ${videoFile.quality.toUpperCase()}`;
             } else {
                 videoBg.style.display = 'none';
                 imageBg.style.display = 'block';
-                document.getElementById('photographer').textContent = `Photographer: ${media.photographer}`;
-                document.getElementById('duration').textContent = `Photo | Size: ${media.width}x${media.height}`;
             }
-            document.getElementById('category').textContent = `Category: ${currentCategory} | Type: ${mediaType}`;
         }
         
         function setupControls() {
+            // 菜单切换按钮
+            document.getElementById('toggle-menu').addEventListener('click', function(e) {
+                e.stopPropagation();
+                const controls = document.getElementById('controls');
+                controls.classList.toggle('show');
+            });
+            
+            // 点击外部区域收起菜单
+            document.addEventListener('click', function(e) {
+                const controls = document.getElementById('controls');
+                const toggleBtn = document.getElementById('toggle-menu');
+                if (!controls.contains(e.target) && e.target !== toggleBtn) {
+                    controls.classList.remove('show');
+                }
+            });
+            
             document.getElementById('prev-btn').addEventListener('click', () => {
                 if (isAutoSwitch) toggleAutoSwitch();
                 playMedia(currentMediaIndex - 1);
-                if (window.innerWidth <= 768) closeMenu();
             });
             
             document.getElementById('next-btn').addEventListener('click', () => {
                 if (isAutoSwitch) toggleAutoSwitch();
                 playMedia(currentMediaIndex + 1);
-                if (window.innerWidth <= 768) closeMenu();
             });
             
             document.getElementById('toggle-auto-btn').addEventListener('click', toggleAutoSwitch);
@@ -507,7 +855,7 @@
                 customQuery.style.display = showCustom ? 'block' : 'none';
                 document.getElementById('search-btn').style.display = showCustom ? 'block' : 'none';
                 if (!showCustom) {
-                    currentPage = 1;
+                    currentPage = 1; // 重置页码
                     fetchMedia();
                 }
                 saveSettings();
@@ -516,10 +864,13 @@
             document.getElementById('search-btn').addEventListener('click', function() {
                 const query = document.getElementById('custom-query').value.trim();
                 if (query) {
-                    currentPage = 1;
-                    fetchMedia();
+                    currentPage = 1; // 重置页码
+                    fetchMedia().then(() => {
+                        if (mediaItems.length > 0) {
+                            playMedia(0);
+                        }
+                    });
                     saveSettings();
-                    if (window.innerWidth <= 768) closeMenu();
                 }
             });
             
@@ -528,10 +879,10 @@
                 if (hours && hours > 0) {
                     switchIntervalHours = hours;
                     if (isAutoSwitch) {
-                        startAutoSwitch();
+                        startAutoSwitch(); // 重新启动定时器
                     }
                     saveSettings();
-                    if (window.innerWidth <= 768) closeMenu();
+                    alert(`Auto switch interval set to ${hours} hour(s)`);
                 }
             });
         }
@@ -569,11 +920,12 @@
             clearInterval(autoSwitchInterval);
             if (isLoopCurrent) return;
             
-            const intervalMs = switchIntervalHours * 60 * 60 * 1000;
+            const intervalMs = switchIntervalHours * 60 * 60 * 1000; // 转换为毫秒
             autoSwitchInterval = setInterval(() => {
                 const videoBg = document.getElementById('video-bg');
                 const imageBg = document.getElementById('image-bg');
                 
+                // 确保当前媒体已加载完成
                 if ((mediaType === 'videos' && videoBg.readyState >= 3) || 
                     (mediaType === 'photos' && imageBg.complete)) {
                     playMedia(currentMediaIndex + 1);
